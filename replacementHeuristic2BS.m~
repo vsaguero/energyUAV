@@ -141,8 +141,8 @@ function [percentageUsersAP, percentageUsersBS, replacements] = replacementHeuri
                     if replacementScheduled(ranking(currentIndex)) == 0
                         totalTime = 2*tripTime(ranking(currentIndex)) + takeOffTime + landingTime + batteryReplacementTime;
                         % Check if the UAVs are in the warning area 
-                        warning = [];
-                        warning = find(change < totalTime+currentTime);
+%                         warning = [];
+%                         warning = find(change < totalTime+currentTime);
 
                         if isempty(warning)
                             if remainingBattery(ranking(currentIndex)) >= batteryThresholds(ranking(currentIndex))
@@ -169,7 +169,7 @@ function [percentageUsersAP, percentageUsersBS, replacements] = replacementHeuri
                                change(ranking(currentIndex)) = currentTime + tripTime(ranking(currentIndex)) + takeOffTime + lifeTime(ranking(currentIndex));
                                insertEvent(currentTime+tripTime(ranking(currentIndex))+takeOffTime, evReplacement, ranking(currentIndex));
                             end
-                        else
+%                         else
 %                             warningRanking = [];
 %                             for i=1:length(warning)
 %                                 if replacementScheduled(warning(i)) == 0
@@ -180,45 +180,33 @@ function [percentageUsersAP, percentageUsersBS, replacements] = replacementHeuri
 %                                     end
 %                                 end
 %                             end
-                        
-                            warningRanking = [];
-                            for i=1:length(warning)
-                                if replacementScheduled(warning(i)) == 0
-                                    auxiliar = find(ranking==warning(i));
-                                    if usersAP(ranking(auxiliar)) > usersAP(currentIndex)
-                                        fprintf('no dede entrar en escenarioII')
-                                        warningRanking = [warningRanking, auxiliar];
-                                    end
-                                end
-                            end
-
-                            if length(find(warningRanking<currentIndex)) < reserveUAVs || isempty(warningRanking) 
-                                if remainingBattery(ranking(currentIndex)) >= batteryThresholds(ranking(currentIndex))
-                                    reserveUAVs = reserveUAVs - 1;
-                                    replacementScheduled(ranking(currentIndex)) = 1;
-                                    change(ranking(currentIndex)) = currentTime + tripTime(ranking(currentIndex)) + takeOffTime + lifeTime(ranking(currentIndex));
-                                    insertEvent(currentTime+tripTime(ranking(currentIndex))+takeOffTime, evReplacement, ranking(currentIndex));
-                                    insertEvent(currentTime+batteryReplacementTime+2*(tripTime(ranking(currentIndex))+landingTime), evReserveUp, ranking(currentIndex));
-                                end
-                                if remainingBattery(ranking(currentIndex))< batteryThresholds(ranking(currentIndex)) && remainingBattery(ranking(currentIndex)) >= ((batteryThresholds(ranking(currentIndex))/2)+1)
-                                    reserveUAVs = reserveUAVs - 1;
-                                    replacementScheduled(ranking(currentIndex)) = 1;
-                                    change(ranking(currentIndex)) = currentTime + tripTime(ranking(currentIndex)) + takeOffTime + lifeTime(ranking(currentIndex));
-                                    insertEvent(currentTime+tripTime(ranking(currentIndex))+takeOffTime, evReplacement, ranking(currentIndex));
-                                    time = (remainingBattery(ranking(currentIndex)) - (batteryThresholds(ranking(currentIndex))/2))*consumption(ranking(currentIndex));
-                                    insertEvent(currentTime+batteryReplacementTime+time+tripTime(ranking(currentIndex))+landingTime, evReserveUp, ranking(currentIndex));
-                                end
-                                if remainingBattery(ranking(currentIndex)) < ((batteryThresholds(ranking(currentIndex))/2)+1)
-                                   reserveUAVs = reserveUAVs - 1;
-                                   replacementScheduled(ranking(currentIndex)) = 1;
-                                   change(ranking(currentIndex)) = currentTime + tripTime(ranking(currentIndex)) + takeOffTime + lifeTime(ranking(currentIndex));
-                                   insertEvent(currentTime+tripTime(ranking(currentIndex))+takeOffTime, evReplacement, ranking(currentIndex));
-                                end
-                            else
-                                currentIndex = min(warningRanking)-1;
-                            end
-                        end
-                    end
+                            %if length(find(warningRanking<currentIndex)) < reserveUAVs || isempty(warningRanking) 
+%                                 if remainingBattery(ranking(currentIndex)) >= batteryThresholds(ranking(currentIndex))
+%                                     reserveUAVs = reserveUAVs - 1;
+%                                     replacementScheduled(ranking(currentIndex)) = 1;
+%                                     change(ranking(currentIndex)) = currentTime + tripTime(ranking(currentIndex)) + takeOffTime + lifeTime(ranking(currentIndex));
+%                                     insertEvent(currentTime+tripTime(ranking(currentIndex))+takeOffTime, evReplacement, ranking(currentIndex));
+%                                     insertEvent(currentTime+batteryReplacementTime+2*(tripTime(ranking(currentIndex))+landingTime), evReserveUp, ranking(currentIndex));
+%                                 end
+%                                 if remainingBattery(ranking(currentIndex))< batteryThresholds(ranking(currentIndex)) && remainingBattery(ranking(currentIndex)) >= ((batteryThresholds(ranking(currentIndex))/2)+1)
+%                                     reserveUAVs = reserveUAVs - 1;
+%                                     replacementScheduled(ranking(currentIndex)) = 1;
+%                                     change(ranking(currentIndex)) = currentTime + tripTime(ranking(currentIndex)) + takeOffTime + lifeTime(ranking(currentIndex));
+%                                     insertEvent(currentTime+tripTime(ranking(currentIndex))+takeOffTime, evReplacement, ranking(currentIndex));
+%                                     time = (remainingBattery(ranking(currentIndex)) - (batteryThresholds(ranking(currentIndex))/2))*consumption(ranking(currentIndex));
+%                                     insertEvent(currentTime+batteryReplacementTime+time+tripTime(ranking(currentIndex))+landingTime, evReserveUp, ranking(currentIndex));
+%                                 end
+%                                 if remainingBattery(ranking(currentIndex)) < ((batteryThresholds(ranking(currentIndex))/2)+1)
+%                                    reserveUAVs = reserveUAVs - 1;
+%                                    replacementScheduled(ranking(currentIndex)) = 1;
+%                                    change(ranking(currentIndex)) = currentTime + tripTime(ranking(currentIndex)) + takeOffTime + lifeTime(ranking(currentIndex));
+%                                    insertEvent(currentTime+tripTime(ranking(currentIndex))+takeOffTime, evReplacement, ranking(currentIndex));
+%                                 end
+%                             %else
+%                                 %currentIndex = min(warningRanking)-1;
+%                             %end
+%                         end
+                     end
                     currentIndex = currentIndex + 1;
                     if currentIndex > numberOfUAVs
                         currentIndex = 1;
