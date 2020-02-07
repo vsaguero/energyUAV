@@ -148,7 +148,7 @@ function [percentageUsersAP, replacements] = replacementLegacy2 (time, uavs, res
                 end
              
                 if sum(upDown) < numberOfUAVs
-                    adjacencyMatrix = generateMatrix(maximumDistance, UAVpositions, GCSpositions,numberOfUAVs,remainingBattery);
+                    adjacencyMatrix = generateMatrix(maximumDistance, UAVpositions, GCSpositions,numberOfUAVs,upDown);
                     G = graph(adjacencyMatrix);
                     for i=1:numberOfUAVs
                         P = shortestpath(G,1,i+1);

@@ -1,4 +1,4 @@
-function [percentageUsersAP, percentageUsersBS, replacements] = replacementHeuristic2 (time, uavs, reserve, uavLocations, users, userLocation, gcs)
+function [percentageUsersAP, percentageUsersBS, replacements] = replacementHeuristic2BS (time, uavs, reserve, uavLocations, users, userLocation, gcs)
     
     %
     % FUNCTION PARAMETERS

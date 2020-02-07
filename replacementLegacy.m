@@ -1,4 +1,4 @@
-function [percentageUsersAP, replacements] = replacementLegacy (time, uavs, reserve, uavLocations, users, userLocation, gcs)
+function [percentageUsersAP,percentageUsersBS, replacements, monitorUpDown] = replacementLegacy (time, uavs, reserve, uavLocations, users, userLocation, gcs)
     
     %
     % FUNCTION PARAMETERS
@@ -41,6 +41,7 @@ function [percentageUsersAP, replacements] = replacementLegacy (time, uavs, rese
     %
     numberOfReplacements = 0;
     valorUsersAP = 0;
+    valorUsersBS = 0;
     
     % Discrete event simulator stuff
     global queue maxQueue eventTime eventType eventNext eventIsFree eventNodeInvolved slotFreeFlag slotBusyFlag;
@@ -76,7 +77,9 @@ function [percentageUsersAP, replacements] = replacementLegacy (time, uavs, rese
     reserveUAVs = numberOfReserveUAVs;
     % Consumption depending on the area
     consumption = ones(1, numberOfUAVs).*0.083;
-    
+
+    monitorUpDown = zeros(numberOfUAVs,1);
+
     if length(UAVpositions(:,1)) ~= length(usersAP)
         fprintf('UAVpositions and usersAP must have the same dimensions \n')
         return
@@ -143,7 +146,7 @@ function [percentageUsersAP, replacements] = replacementLegacy (time, uavs, rese
                 end
                 
                 if sum(upDown) < numberOfUAVs
-                    adjacencyMatrix = generateMatrix(maximumDistance, UAVpositions, GCSpositions,numberOfUAVs,remainingBattery);
+                    adjacencyMatrix = generateMatrix(maximumDistance, UAVpositions, GCSpositions,numberOfUAVs,upDown);
                     G = graph(adjacencyMatrix);
                     for i=1:numberOfUAVs
                         P = shortestpath(G,1,i+1);
@@ -151,6 +154,18 @@ function [percentageUsersAP, replacements] = replacementLegacy (time, uavs, rese
                             valorUsersAP = valorUsersAP + usersAP(i);
                         end
                     end
+                end
+                
+               if sum(upDown) < numberOfUAVs
+                    for i=1:numberOfUAVs
+                        if upDown(i) == 0
+                            valorUsersBS = valorUsersBS + usersAP(i);
+                        end
+                    end
+                end
+                
+                for i=1:length(upDown)
+                    monitorUpDown(i) = monitorUpDown(i)+upDown(i);
                 end
                 
             case evReserveUp
@@ -182,7 +197,9 @@ function [percentageUsersAP, replacements] = replacementLegacy (time, uavs, rese
         currentEvent = queue(currentEvent, eventNext);
         currentTime = queue(currentEvent, 1);
     end
-    currentTime
+    %currentTime
+    sum(monitorUpDown)
     replacements = numberOfReplacements;
     percentageUsersAP  = 1 - (valorUsersAP/((simulationTime/samplingTime)*numberOfUsers));
+    percentageUsersBS  = 1 - (valorUsersBS/((simulationTime/samplingTime)*numberOfUsers));
 end

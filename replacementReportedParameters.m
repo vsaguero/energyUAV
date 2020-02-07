@@ -1,4 +1,4 @@
-function [percentageUsersAP, replacements] = replacementReportedParameters (time, uavs, reserve, uavLocations, users, userLocation, gcs)
+function [percentageUsersAP, percentageUsersBS,replacements] = replacementReportedParameters (time, uavs, reserve, uavLocations, users, userLocation, gcs)
     
     %
     % FUNCTION PARAMETERS
@@ -41,6 +41,7 @@ function [percentageUsersAP, replacements] = replacementReportedParameters (time
     %
     numberOfReplacements = 0;
     valorUsersAP = 0;
+    valorUsersBS = 0;
     
     % Discrete event simulator stuff
     global queue maxQueue eventTime eventType eventNext eventIsFree eventNodeInvolved slotFreeFlag slotBusyFlag;
@@ -169,12 +170,19 @@ function [percentageUsersAP, replacements] = replacementReportedParameters (time
                 end
                                                                 
                 if sum(upDown) < numberOfUAVs
-                    adjacencyMatrix = generateMatrix(maximumDistance, UAVpositions, GCSpositions,numberOfUAVs,remainingBattery);
+                    adjacencyMatrix = generateMatrix(maximumDistance, UAVpositions, GCSpositions,numberOfUAVs,upDown);
                     G = graph(adjacencyMatrix);
                     for i=1:numberOfUAVs
                         P = shortestpath(G,1,i+1);
                         if isempty(P)
                             valorUsersAP = valorUsersAP + usersAP(i);
+                        end
+                    end
+                end
+                if sum(upDown) < numberOfUAVs
+                    for i=1:numberOfUAVs
+                        if upDown(i) == 0
+                            valorUsersBS = valorUsersBS + usersAP(i);
                         end
                     end
                 end
@@ -211,4 +219,5 @@ function [percentageUsersAP, replacements] = replacementReportedParameters (time
     
     replacements = numberOfReplacements;
     percentageUsersAP  = 1 - (valorUsersAP/((simulationTime/samplingTime)*numberOfUsers));
+    percentageUsersBS  = 1 - (valorUsersBS/((simulationTime/samplingTime)*numberOfUsers));
 end
