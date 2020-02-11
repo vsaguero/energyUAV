@@ -11,5 +11,5 @@ function [ranking, auxiliar] = rankingUAVs (numberOfUAVs,adjacencyMatrix, usersA
             end
         end
     end
-    [B ranking] = sort(auxiliar,'ascend');
+    [B ranking] = sort(auxiliar,'descend');
 end

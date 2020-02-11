@@ -1,4 +1,4 @@
-function [percentageUsersAP, percentageUsersBS, replacements] = replacementHeuristic2BS (time, uavs, reserve, uavLocations, users, userLocation, gcs)
+function [percentageUsersAP, percentageUsersBS, replacements] = replacementHeuristic3AP (time, uavs, reserve, uavLocations, users, userLocation, gcs)
     
     %
     % FUNCTION PARAMETERS
@@ -36,8 +36,6 @@ function [percentageUsersAP, percentageUsersBS, replacements] = replacementHeuri
     % landing time [s]
     landingTime = 60;
     
-    valueTH = 25;
-
     %
     % STATISTICS
     %
@@ -77,7 +75,8 @@ function [percentageUsersAP, percentageUsersBS, replacements] = replacementHeuri
     upDown = ones(1,numberOfUAVs);
     %How many UAVs are in the fleet (areas + reserveUAVs)
     reserveUAVs = numberOfReserveUAVs;
-    [ranking] = rankingUAVsBSs(usersAP);
+    adjacencyMatrix = generateMatrix(maximumDistance, UAVpositions, GCSpositions,numberOfUAVs,upDown);
+    [ranking] = rankingUAVs(numberOfUAVs,adjacencyMatrix, usersAP);
     
     %Consumption depending on the area
     consumption = ones(1, numberOfUAVs).*0.083;
@@ -140,7 +139,7 @@ function [percentageUsersAP, percentageUsersBS, replacements] = replacementHeuri
                 [batteryValues, batteryRanking] = sort(remainingBattery,'ascend');
                 for i=1:length(batteryRanking)
                     currentUAV = batteryRanking(i);
-                    if replacementScheduled(currentUAV) == 0 && reserveUAVs > 0 && remainingBattery(currentUAV) < 90
+                    if replacementScheduled(currentUAV) == 0 && reserveUAVs > 0 && remainingBattery(currentUAV) < 100
                         totalTime = 2*tripTime(currentUAV) + takeOffTime + landingTime + batteryReplacementTime;
                         warning = [];
                         warning = find(change < totalTime+currentTime);
@@ -170,9 +169,10 @@ function [percentageUsersAP, percentageUsersBS, replacements] = replacementHeuri
                             end                              
                         else
                             warningRanking = 0;
+                            %REVISAR SI ESTO ESTA BIEN LECHE
                             for j=1:length(warning)
                                 if replacementScheduled(warning(j)) == 0
-                                    if usersAP(warning(j)) > usersAP(currentUAV)
+                                    if find(ranking == warning(j)) < find(ranking == currentUAV)
                                         warningRanking = warningRanking + 1;
                                     end
                                 end
@@ -194,10 +194,8 @@ function [percentageUsersAP, percentageUsersBS, replacements] = replacementHeuri
                                     insertEvent(currentTime+batteryReplacementTime+time+tripTime(currentUAV)+landingTime, evReserveUp, currentUAV);
                                 end
                                 if remainingBattery(currentUAV) < ((batteryThresholds(currentUAV)/2)+1)
-                                   %fprintf('debug6  \n')
                                    reserveUAVs = reserveUAVs - 1;
                                    replacementScheduled(currentUAV) = 1;
-                                   % When the UAV enters in the warning area
                                    change(currentUAV) = currentTime + tripTime(currentUAV) + takeOffTime + lifeTime(currentUAV);
                                    insertEvent(currentTime+tripTime(currentUAV)+takeOffTime, evReplacement, currentUAV);
                                 end
@@ -221,16 +219,16 @@ function [percentageUsersAP, percentageUsersBS, replacements] = replacementHeuri
                      end
                 end
 
-%                 if sum(upDown) < numberOfUAVs
-%                     adjacencyMatrix = generateMatrix(maximumDistance, UAVpositions, GCSpositions,numberOfUAVs,upDown);
-%                     G = graph(adjacencyMatrix);
-%                     for i=1:numberOfUAVs
-%                         P = shortestpath(G,1,i+1);
-%                         if isempty(P)
-%                             valorUsersAP = valorUsersAP + usersAP(i);
-%                         end
-%                     end
-%                 end
+                if sum(upDown) < numberOfUAVs
+                    adjacencyMatrix = generateMatrix(maximumDistance, UAVpositions, GCSpositions,numberOfUAVs,upDown);
+                    G = graph(adjacencyMatrix);
+                    for i=1:numberOfUAVs
+                        P = shortestpath(G,1,i+1);
+                        if isempty(P)
+                            valorUsersAP = valorUsersAP + usersAP(i);
+                        end
+                    end
+                end
                 if sum(upDown) < numberOfUAVs
                     for i=1:numberOfUAVs
                         if upDown(i) == 0

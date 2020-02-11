@@ -3,11 +3,11 @@ simulationTime = 36000;
 
 % Select 1 the desired algorithm
 heuristic = 1;
-reported = 1;
+reported = 0;
 legacy = 0;
 
 % Select between the scenarios 1, 2, 3 or custom
-scenario = 2;
+scenario = 3;
 
 if scenario == 1
     % Target areas
@@ -28,10 +28,11 @@ end
  
 if scenario == 2
     % Target areas
-    areas = [0 0; 50 0; 100 0; 150 0; 200 0; 0 50; 50 50; 100 50; 150 50; 200 50; 0 100; 50 100; 100 100; 150 100; 200 100; 0 150; 50 150; 100 150; 150 150; 200 150; 0 200; 50 200; 100 200; 150 200; 200 200];
+    %areas = [0 0; 50 0; 100 0; 150 0; 200 0; 0 50; 50 50; 100 50; 150 50; 200 50; 0 100; 50 100; 100 100; 150 100; 200 100; 0 150; 50 150; 100 150; 150 150; 200 150; 0 200; 50 200; 100 200; 150 200; 200 200];
     % Users per area
-    users = [10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10;];
-  
+    %users = [10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10; 10;];
+    users = [10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10;];
+
     areas = [200 0;150 0;200 50;100 0;50 0;0 0;200 100;150 50; 100 50;200 150;150 100;50 50;200 200; 0 50; 100 100; 150 150; 50 100; 150 200; 0 100; 100 150; 100 200; 50 150; 0 150; 50 200; 0 200];
     %areas = flip(areas)
     % GCS location
@@ -40,11 +41,11 @@ if scenario == 2
 
     scenario = 'scenario_2_';
 
-    scatter(areas(:,1), areas(:,2), 'bo', 'filled')
-    hold on
-    scatter(GCSpositions(:,1), GCSpositions(:,2), 'gd', 'filled')
-    box
-    grid
+%     scatter(areas(:,1), areas(:,2), 'bo', 'filled')
+%     hold on
+%     scatter(GCSpositions(:,1), GCSpositions(:,2), 'gd', 'filled')
+%     box
+%     grid
 end
 
 if scenario == 3
@@ -55,16 +56,35 @@ if scenario == 3
     % GCS location
     GCSpositions = [100 350;];
     % numberOfUAVs
-    numberOfUAVs = 0;
 
     scenario = 'scenario_3_';
     
-    scatter(areas(:,1), areas(:,2), 'bo', 'filled')
-    hold on
-    scatter(GCSpositions(:,1), GCSpositions(:,2), 'gd', 'filled')
-    box
-    grid
+%     scatter(areas(:,1), areas(:,2), 'bo', 'filled')
+%     hold on
+%     scatter(GCSpositions(:,1), GCSpositions(:,2), 'gd', 'filled')
+%     box
+%     grid
 end
+
+if scenario == 4
+    % Target areas
+    areas = areas3
+    % Users per area
+    users = [10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30; 50; 10; 30];
+    % GCS location
+    GCSpositions = [0 250;];
+    % numberOfUAVs
+
+    scenario = 'scenario_4_';
+    
+%     scatter(areas(:,1), areas(:,2), 'bo', 'filled')
+%     hold on
+%     scatter(GCSpositions(:,1), GCSpositions(:,2), 'gd', 'filled')
+%     box
+%     grid
+end
+
+
 
 date = clock;
 
@@ -73,7 +93,7 @@ if heuristic == 1
     HE = [];
     for i=0:length(areas)
         numberOfUAVs =   i;
-        [connectivityHE, connectivityHEbs, replacementsHE] = replacementHeuristic2BS(simulationTime, length(areas), numberOfUAVs, areas, sum(users), users, GCSpositions)
+        [connectivityHE, connectivityHEbs, replacementsHE] = replacementHeuristic3AP(simulationTime, length(areas), numberOfUAVs, areas, sum(users), users, GCSpositions)
         HE(i+1,1) = connectivityHE
         HE(i+1,2) = connectivityHEbs
         HE(i+1,3) = replacementsHE
@@ -81,7 +101,7 @@ if heuristic == 1
     A = strcat(scenario,'HE','_',int2str(date(1)),'_',int2str(date(2)),'_',int2str(date(3)),'_',int2str(date(4)),'_',int2str(date(5)),'.mat');
     save(A,'HE');
 end
- 
+
 if reported == 1
     numberOfUAVs = 0;
     RP = [];
